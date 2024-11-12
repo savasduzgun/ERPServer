@@ -2,6 +2,7 @@
 
 namespace ERPServer.Domain.Entities
 {
+    //identity kütüphanesi kullanıldı, kütüphanede olmayan bir kaç property eklendi. 
     public sealed class AppUser : IdentityUser<Guid>
     {
         public string FirstName { get; set; } = string.Empty;
