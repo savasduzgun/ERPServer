@@ -14,6 +14,7 @@ namespace ERPServer.Application.Features.Auth.Login
     {
         public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
+            //user kontrolü yapıyor yoksa hata dönüyor
             AppUser? user = await userManager.Users
                 .FirstOrDefaultAsync(p =>
                 p.UserName == request.EmailOrUserName ||
@@ -25,6 +26,7 @@ namespace ERPServer.Application.Features.Auth.Login
                 return (500, "Kullanıcı bulunamadı");
             }
 
+            //varsa şifreyi 3 kere yanlış girerse 5 dk kitliyor
             SignInResult signInResult = await signInManager.CheckPasswordSignInAsync(user, request.Password, true);
 
             if (signInResult.IsLockedOut)
@@ -35,17 +37,18 @@ namespace ERPServer.Application.Features.Auth.Login
                 else
                     return (500, "Kullanıcınız 3 kez yanlış şifre girdiği için 5 dakika süreyle bloke edilmiştir");
             }
-
+            //mail mutlaka onaylı olmak zorunda
             if (signInResult.IsNotAllowed)
             {
                 return (500, "Mail adresiniz onaylı değil");
             }
-
+            //şifre yanlışsa 
             if (!signInResult.Succeeded)
             {
                 return (500, "Şifreniz yanlış");
             }
 
+            //refresh token üretip geri döndürüyor
             var loginResponse = await jwtProvider.CreateToken(user);
 
 
